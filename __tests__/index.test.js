@@ -53,3 +53,43 @@ describe("GET /api", () => {
       });
   });
 });
+
+describe("GET /api/articles/:article_id", () => {
+  test("status 200: responds with an article object", () => {
+      return request(app)
+      .get("/api/articles/1")
+      .expect(200)
+      .then(({ body }) => {
+          expect(body.article.article_id).toBe(1);
+          expect(typeof body.article.author).toBe("string");
+          expect(typeof body.article.title).toBe("string");
+          expect(typeof body.article.article_id).toBe("number");
+          expect(typeof body.article.body).toBe("string");
+          expect(typeof body.article.topic).toBe("string");
+          expect(typeof body.article.created_at).toBe("string");
+          expect(typeof body.article.votes).toBe("number");
+          expect(typeof body.article.article_img_url).toBe("string");
+      });
+  });
+
+  //Error handling
+  test("status 404: responds with error message when given a wrong URL", () => {
+      return request(app)
+      .get("/api/articles/1000")
+      .expect(404)
+      .then(({ body }) => {
+          expect(body.msg).toBe("Article not found");
+      });
+  });
+
+  test("status 400: responds with error message when given an invalid article_id", () => {
+    return request(app)
+    .get("/api/articles/invalid")
+    .expect(400)
+    .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+    });
+});
+
+});
+
