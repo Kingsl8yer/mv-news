@@ -61,6 +61,7 @@ describe("GET /api/articles/:article_id", () => {
       .expect(200)
       .then(({ body }) => {
           expect(body.article.length).toBe(1);
+          expect(body.article[0].article_id).toBe(1);
           expect(typeof body.article[0].author).toBe("string");
           expect(typeof body.article[0].title).toBe("string");
           expect(typeof body.article[0].article_id).toBe("number");
@@ -81,5 +82,15 @@ describe("GET /api/articles/:article_id", () => {
           expect(body.msg).toBe("Article not found");
       });
   });
+
+  test("status 400: responds with error message when given an invalid article_id", () => {
+    return request(app)
+    .get("/api/articles/invalid")
+    .expect(400)
+    .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+    });
+});
+
 });
 
