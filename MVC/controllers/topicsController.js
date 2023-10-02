@@ -1,4 +1,5 @@
 const { selectAllTopics } = require("../models/topicsModel");
+const endPoints = require("../../endpoints.json");
 
 exports.getAllTopics = (req, res, next) => {
   selectAllTopics()
@@ -9,24 +10,5 @@ exports.getAllTopics = (req, res, next) => {
 };
 
 exports.getAllEndpoints = (req, res, next) => {
-  res.status(200).send({
-    endpoints: {
-      "GET /api/topics": {
-        description: "serves an array of all topics",
-        queries: [],
-        exampleResponse: {
-          topics: [
-            {
-              slug: "basketball",
-              description: "Stephen Curry is the best!",
-            },
-            {
-              slug: "coding",
-              description: "Hola mundo!",
-            },
-          ],
-        },
-      },
-    },
-  });
+  res.status(200).send({endPoints: endPoints});
 };
