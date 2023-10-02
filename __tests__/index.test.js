@@ -53,3 +53,33 @@ describe("GET /api", () => {
       });
   });
 });
+
+describe("GET /api/articles/:article_id", () => {
+  test("status 200: responds with an article object", () => {
+      return request(app)
+      .get("/api/articles/1")
+      .expect(200)
+      .then(({ body }) => {
+          expect(body.article.length).toBe(1);
+          expect(typeof body.article[0].author).toBe("string");
+          expect(typeof body.article[0].title).toBe("string");
+          expect(typeof body.article[0].article_id).toBe("number");
+          expect(typeof body.article[0].body).toBe("string");
+          expect(typeof body.article[0].topic).toBe("string");
+          expect(typeof body.article[0].created_at).toBe("string");
+          expect(typeof body.article[0].votes).toBe("number");
+          expect(typeof body.article[0].article_img_url).toBe("string");
+      });
+  });
+
+  //Error handling
+  test("status 404: responds with error message when given a wrong URL", () => {
+      return request(app)
+      .get("/api/articles/1000")
+      .expect(404)
+      .then(({ body }) => {
+          expect(body.msg).toBe("Article not found");
+      });
+  });
+});
+
