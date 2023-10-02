@@ -1,5 +1,10 @@
 const express = require("express");
 const app = express();
+const {
+    handleCustomErrors,
+    handlePsqlErrors,
+    handleServerErrors,
+  } = require('./errors');
 
 const {
   getAllTopics,
@@ -18,16 +23,8 @@ app.all("/*", (req, res, next) => {
 });
 
 //Error handling
-app.use((err, req, res, next)=>{
-    if(err.code === '22P02')
-    res.status(400).send({msg: "Bad request"})
-    next(err);
-  })
-
-app.use((err, req, res, next) => {
-    if(err.status) res.status(err.status).send({msg: err.msg});
-    else next(err);
-});
-
+app.use(handleCustomErrors);
+app.use(handlePsqlErrors);
+app.use(handleServerErrors);
 
 module.exports = app;
