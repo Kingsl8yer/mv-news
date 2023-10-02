@@ -60,16 +60,15 @@ describe("GET /api/articles/:article_id", () => {
       .get("/api/articles/1")
       .expect(200)
       .then(({ body }) => {
-          expect(body.article.length).toBe(1);
-          expect(body.article[0].article_id).toBe(1);
-          expect(typeof body.article[0].author).toBe("string");
-          expect(typeof body.article[0].title).toBe("string");
-          expect(typeof body.article[0].article_id).toBe("number");
-          expect(typeof body.article[0].body).toBe("string");
-          expect(typeof body.article[0].topic).toBe("string");
-          expect(typeof body.article[0].created_at).toBe("string");
-          expect(typeof body.article[0].votes).toBe("number");
-          expect(typeof body.article[0].article_img_url).toBe("string");
+          expect(body.article.article_id).toBe(1);
+          expect(typeof body.article.author).toBe("string");
+          expect(typeof body.article.title).toBe("string");
+          expect(typeof body.article.article_id).toBe("number");
+          expect(typeof body.article.body).toBe("string");
+          expect(typeof body.article.topic).toBe("string");
+          expect(typeof body.article.created_at).toBe("string");
+          expect(typeof body.article.votes).toBe("number");
+          expect(typeof body.article.article_img_url).toBe("string");
       });
   });
 
