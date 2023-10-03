@@ -1,4 +1,5 @@
-const {selectArticleById, selectAllArticles, selectCommentsByArticleId} = require('../models/articlesModels');
+const {selectArticleById, selectAllArticles, selectCommentsByArticleId,
+    updateArticleById } = require('../models/articlesModels');
 
 exports.getArticleById = (req, res, next) => {
     const {article_id} = req.params;
@@ -29,4 +30,18 @@ exports.getCommentsByArticleId = (req, res, next) => {
     .catch((err) => {
         next(err);
     });
+}
+
+exports.patchArticleById = (req, res, next) => {
+    const {article_id} = req.params;
+    const {inc_votes} = req.body;
+    const promises = [selectArticleById(article_id)];
+    if (article_id) promises.push(updateArticleById(article_id, inc_votes));
+    Promise.all(promises)
+    .then(([article, updatedArticle]) => {
+        res.status(200).send(updatedArticle);
+    })
+    .catch((err) => {
+        next(err);
+    })
 }
