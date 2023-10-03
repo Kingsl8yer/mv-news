@@ -128,6 +128,7 @@ describe("GET /api/articles/:article_id/comments", () => {
       .get("/api/articles/1/comments")
       .expect(200)
       .then(({ body }) => {
+              expect(body.length).toBe(11);
               expect(body[0].article_id).toBe(1);
           body.forEach((comment) => {
               expect(typeof comment.comment_id).toBe("number");
