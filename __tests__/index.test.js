@@ -121,3 +121,62 @@ describe("GET /api/articles", () => {
       });
   });
 });
+
+describe("GET /api/articles/:article_id/comments", () => {
+  test("status 200: responds with an array of comment objects", () => {
+      return request(app)
+      .get("/api/articles/1/comments")
+      .expect(200)
+      .then(({ body }) => {
+              expect(body.length).toBe(11);
+              expect(body[0].article_id).toBe(1);
+          body.forEach((comment) => {
+              expect(typeof comment.comment_id).toBe("number");
+              expect(typeof comment.votes).toBe("number");
+              expect(typeof comment.created_at).toBe("string");
+              expect(typeof comment.author).toBe("string");
+              expect(typeof comment.body).toBe("string");
+          });
+      });
+  });
+
+  test("status 200: responds with an array of comment objects sorted by date in descending order.", () => {
+    return request(app)
+    .get("/api/articles/1/comments")
+    .expect(200)
+    .then(({ body }) => {
+        expect(body).toBeSortedBy("created_at", { descending: true });
+    });
+});
+
+  test("status 200: responds with an empty array when given an article_id with no comments", () => {
+      return request(app)
+      .get("/api/articles/2/comments")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Comments not found");
+      });
+  });
+
+
+
+  //Error handling
+  test("status 404: responds with error message when the given article_id does not exist", () => {
+      return request(app)
+      .get("/api/articles/1000/comments")
+      .expect(404)
+      .then(({ body }) => {
+          expect(body.msg).toBe("Article not found");
+      });
+  });
+
+  test("status 400: responds with error message when given an invalid article_id", () => {
+      return request(app)
+      .get("/api/articles/invalid/comments")
+      .expect(400)
+      .then(({ body }) => {
+          expect(body.msg).toBe("Bad request");
+      });
+  });
+
+});
