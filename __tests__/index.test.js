@@ -124,33 +124,33 @@ describe("GET /api/articles", () => {
 
 describe("GET /api/articles/:article_id/comments", () => {
   test("status 200: responds with an array of comment objects", () => {
-      return request(app)
+    return request(app)
       .get("/api/articles/1/comments")
       .expect(200)
       .then(({ body }) => {
-              expect(body.length).toBe(11);
-              expect(body[0].article_id).toBe(1);
-          body.forEach((comment) => {
-              expect(typeof comment.comment_id).toBe("number");
-              expect(typeof comment.votes).toBe("number");
-              expect(typeof comment.created_at).toBe("string");
-              expect(typeof comment.author).toBe("string");
-              expect(typeof comment.body).toBe("string");
-          });
+        expect(body.length).toBe(11);
+        expect(body[0].article_id).toBe(1);
+        body.forEach((comment) => {
+          expect(typeof comment.comment_id).toBe("number");
+          expect(typeof comment.votes).toBe("number");
+          expect(typeof comment.created_at).toBe("string");
+          expect(typeof comment.author).toBe("string");
+          expect(typeof comment.body).toBe("string");
+        });
       });
   });
 
   test("status 200: responds with an array of comment objects sorted by date in descending order.", () => {
     return request(app)
-    .get("/api/articles/1/comments")
-    .expect(200)
-    .then(({ body }) => {
+      .get("/api/articles/1/comments")
+      .expect(200)
+      .then(({ body }) => {
         expect(body).toBeSortedBy("created_at", { descending: true });
-    });
-});
+      });
+  });
 
   test("status 200: responds with an empty array when given an article_id with no comments", () => {
-      return request(app)
+    return request(app)
       .get("/api/articles/2/comments")
       .expect(200)
       .then(({ body }) => {
@@ -158,63 +158,95 @@ describe("GET /api/articles/:article_id/comments", () => {
       });
   });
 
-
-
   //Error handling
   test("status 404: responds with error message when the given article_id does not exist", () => {
-      return request(app)
+    return request(app)
       .get("/api/articles/1000/comments")
       .expect(404)
       .then(({ body }) => {
-          expect(body.msg).toBe("Article not found");
+        expect(body.msg).toBe("Article not found");
       });
   });
 
   test("status 400: responds with error message when given an invalid article_id", () => {
-      return request(app)
+    return request(app)
       .get("/api/articles/invalid/comments")
       .expect(400)
       .then(({ body }) => {
-          expect(body.msg).toBe("Bad request");
+        expect(body.msg).toBe("Bad request");
       });
   });
-
 });
 
 describe("POST /api/articles/:article_id/comments", () => {
   test("status 201: responds with the posted comment object", () => {
-      return request(app)
-          .post("/api/articles/1/comments")
-          .send({username: "butter_bridge", body: "This is a test comment"})
-          .expect(201)
-          .then(({body}) => {
-              expect(body.comment_id).toBe(19);
-              expect(body.author).toBe("butter_bridge");
-              expect(body.article_id).toBe(1);
-              expect(body.body).toBe("This is a test comment");
-          });
+    return request(app)
+      .post("/api/articles/1/comments")
+      .send({ username: "butter_bridge", body: "This is a test comment" })
+      .expect(201)
+      .then(({ body }) => {
+        expect(body.comment_id).toBe(19);
+        expect(body.author).toBe("butter_bridge");
+        expect(body.article_id).toBe(1);
+        expect(body.body).toBe("This is a test comment");
+      });
+  });
+
+  test("status 201: responds with the posted comment object ignoring any extra properties", () => {
+    return request(app)
+      .post("/api/articles/1/comments")
+      .send({
+        username: "butter_bridge",
+        body: "This is a test comment",
+        extra: "extra",
+      })
+      .expect(201)
+      .then(({ body }) => {
+        expect(body.comment_id).toBe(19);
+        expect(body.author).toBe("butter_bridge");
+        expect(body.article_id).toBe(1);
+        expect(body.body).toBe("This is a test comment");
+      });
   });
 
   //Error handling
   test("status 404: responds with error message when the given article_id does not exist", () => {
-      return request(app)
-          .post("/api/articles/1000/comments")
-          .send({username: "butter_bridge", body: "This is a test comment"})
-          .expect(404)
-          .then(({body}) => {
-              expect(body.msg).toBe("Article not found");
-          });
+    return request(app)
+      .post("/api/articles/1000/comments")
+      .send({ username: "butter_bridge", body: "This is a test comment" })
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Article not found");
+      });
   });
 
   test("status 400: responds with error message when given an invalid article_id", () => {
-      return request(app)
-          .post("/api/articles/invalid/comments")
-          .send({username: "butter_bridge", body: "This is a test comment"})
-          .expect(400)
-          .then(({body}) => {
-              expect(body.msg).toBe("Bad request");
-          });
+    return request(app)
+      .post("/api/articles/invalid/comments")
+      .send({ username: "butter_bridge", body: "This is a test comment" })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
   });
 
-});
+  test("status 400: responds with error message when no body is given", () => {
+    return request(app)
+      .post("/api/articles/1/comments")
+      .send({ username: "butter_bridge" })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
+  });
 
+  test("status 400: responds with error message when given non-existent username", () => {
+    return request(app)
+      .post("/api/articles/1/comments")
+      .send({ username: "invalid", body: "This is a test comment" })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
+  });
+});
