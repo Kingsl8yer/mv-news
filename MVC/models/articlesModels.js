@@ -35,3 +35,15 @@ exports.selectCommentsByArticleId = (article_id) => {
         }
     });
 }
+
+exports.insertCommentByArticleId = (article_id, username, body) => {
+    if(!username || !body) {
+        return Promise.reject({status: 400, msg: 'Bad request'});
+    }
+    const sql = `INSERT INTO comments (author, body, article_id)
+        VALUES ($1, $2, $3)
+        RETURNING *;`;
+    return db.query(sql, [username, body, article_id]).then(({ rows }) => {
+        return rows[0];
+    });
+}
