@@ -72,6 +72,15 @@ describe("GET /api/articles/:article_id", () => {
       });
   });
 
+  test("status 200: responds with an article object with a comment_count property", () => {
+    return request(app)
+      .get("/api/articles/1")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.article.comment_count).toBe("11");
+      });
+  });
+
   //Error handling
   test("status 404: responds with error message when given a wrong URL", () => {
     return request(app)
@@ -345,17 +354,16 @@ describe("DELETE /api/comments/:comment_id", () => {
 
 describe("GET /api/users", () => {
   test("status 200: responds with an array of user objects", () => {
-      return request(app)
+    return request(app)
       .get("/api/users")
       .expect(200)
-      .then(({body}) => {
-              expect(body.users.length).toBe(4);
-              body.users.forEach((user) => {
-                  expect(typeof user.username).toBe("string");
-                  expect(typeof user.name).toBe("string");
-                  expect(typeof user.avatar_url).toBe("string");
-              });
+      .then(({ body }) => {
+        expect(body.users.length).toBe(4);
+        body.users.forEach((user) => {
+          expect(typeof user.username).toBe("string");
+          expect(typeof user.name).toBe("string");
+          expect(typeof user.avatar_url).toBe("string");
+        });
       });
   });
 });
-
