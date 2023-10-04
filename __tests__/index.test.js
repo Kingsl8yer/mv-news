@@ -149,7 +149,7 @@ describe("GET /api/articles/:article_id/comments", () => {
       });
   });
 
-  test("status 200: responds with an empty array when given an article_id with no comments", () => {
+  test("status 200: responds with a message 'Comments not found' when given an article_id with no comments", () => {
     return request(app)
       .get("/api/articles/2/comments")
       .expect(200)
