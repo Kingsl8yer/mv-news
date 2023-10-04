@@ -120,6 +120,37 @@ describe("GET /api/articles", () => {
         expect(body.articles).toBeSortedBy("created_at", { descending: true });
       });
   });
+
+  test("status 200: responds with an array of article objects filtered by topic", () => {
+    return request(app)
+      .get("/api/articles?topic=mitch")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.articles.length).toBe(12);
+        body.articles.forEach((article) => {
+          expect(article.topic).toBe("mitch");
+        });
+      });
+  });
+
+  test("status 200: responds with a message 'No articles found' when given a topic with no articles", () => {
+    return request(app)
+      .get("/api/articles?topic=paper")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.msg).toBe("No articles found");
+      });
+  });
+
+  //Error handling
+  test("status 404: responds with error message when given an invalid topic", () => {
+    return request(app)
+      .get("/api/articles?topic=invalid")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Topic not found");
+      });
+  });
 });
 
 describe("GET /api/articles/:article_id/comments", () => {
@@ -345,17 +376,16 @@ describe("DELETE /api/comments/:comment_id", () => {
 
 describe("GET /api/users", () => {
   test("status 200: responds with an array of user objects", () => {
-      return request(app)
+    return request(app)
       .get("/api/users")
       .expect(200)
-      .then(({body}) => {
-              expect(body.users.length).toBe(4);
-              body.users.forEach((user) => {
-                  expect(typeof user.username).toBe("string");
-                  expect(typeof user.name).toBe("string");
-                  expect(typeof user.avatar_url).toBe("string");
-              });
+      .then(({ body }) => {
+        expect(body.users.length).toBe(4);
+        body.users.forEach((user) => {
+          expect(typeof user.username).toBe("string");
+          expect(typeof user.name).toBe("string");
+          expect(typeof user.avatar_url).toBe("string");
+        });
       });
   });
 });
-
