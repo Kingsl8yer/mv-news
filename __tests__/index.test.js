@@ -124,7 +124,7 @@ describe("GET /api/articles", () => {
 
 describe("GET /api/articles/:article_id/comments", () => {
   test("status 200: responds with an array of comment objects", () => {
-      return request(app)
+    return request(app)
       .get("/api/articles/1/comments")
       .expect(200)
       .then(({ body }) => {
@@ -306,6 +306,36 @@ describe("PATCH /api/articles/:article_id", () => {
     return request(app)
       .patch("/api/articles/1")
       .send({})
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
+  });
+});
+
+describe("DELETE /api/comments/:comment_id", () => {
+  test("status 204: responds with no content", () => {
+    return request(app)
+      .delete("/api/comments/1")
+      .expect(204)
+      .then(({ body }) => {
+        expect(body).toEqual({});
+      });
+  });
+
+  //Error handling
+  test("status 404: responds with error message when the given comment_id does not exist", () => {
+    return request(app)
+      .delete("/api/comments/1000")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Comment not found");
+      });
+  });
+
+  test("status 400: responds with error message when given an invalid comment_id", () => {
+    return request(app)
+      .delete("/api/comments/invalid")
       .expect(400)
       .then(({ body }) => {
         expect(body.msg).toBe("Bad request");
