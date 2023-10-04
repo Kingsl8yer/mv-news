@@ -124,7 +124,7 @@ describe("GET /api/articles", () => {
 
 describe("GET /api/articles/:article_id/comments", () => {
   test("status 200: responds with an array of comment objects", () => {
-    return request(app)
+      return request(app)
       .get("/api/articles/1/comments")
       .expect(200)
       .then(({ body }) => {
@@ -244,6 +244,68 @@ describe("POST /api/articles/:article_id/comments", () => {
     return request(app)
       .post("/api/articles/1/comments")
       .send({ username: "invalid", body: "This is a test comment" })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
+  });
+});
+
+describe("PATCH /api/articles/:article_id", () => {
+  test("status 200: responds with the updated article object", () => {
+    return request(app)
+      .patch("/api/articles/1")
+      .send({ inc_votes: 1 })
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.votes).toBe(101);
+      });
+  });
+
+  //Error handling
+  test("status 404: responds with error message when the given article_id does not exist", () => {
+    return request(app)
+      .patch("/api/articles/1000")
+      .send({ inc_votes: 1 })
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Article not found");
+      });
+  });
+
+  test("status 400: responds with error message when given an invalid article_id", () => {
+    return request(app)
+      .patch("/api/articles/invalid")
+      .send({ inc_votes: 1 })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
+  });
+
+  test("status 400: responds with error message when given an invalid inc_votes", () => {
+    return request(app)
+      .patch("/api/articles/1")
+      .send({ inc_votes: "invalid" })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
+  });
+  test("status 400: responds with error message when given an invalid key for inc_votes", () => {
+    return request(app)
+      .patch("/api/articles/1")
+      .send({ invalid: 1 })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
+  });
+
+  test("status 400: responds with error message when given an empty body", () => {
+    return request(app)
+      .patch("/api/articles/1")
+      .send({})
       .expect(400)
       .then(({ body }) => {
         expect(body.msg).toBe("Bad request");

@@ -47,3 +47,17 @@ exports.insertCommentByArticleId = (article_id, username, body) => {
         return rows[0];
     });
 }
+
+
+exports.updateArticleById = (article_id, inc_votes) => {
+    if(!inc_votes) {
+        return Promise.reject({status: 400, msg: 'Bad request'});
+    }
+    const sql = `UPDATE articles
+        SET votes = votes + $1
+        WHERE article_id = $2
+        RETURNING *;`;
+    return db.query(sql, [inc_votes, article_id]).then(({ rows }) => {
+        return rows[0];
+    });
+}
