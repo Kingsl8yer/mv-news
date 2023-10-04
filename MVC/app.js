@@ -1,17 +1,26 @@
 const express = require("express");
 const app = express();
+
 const {
-    handleCustomErrors,
-    handlePsqlErrors,
-    handleServerErrors,
-  } = require('./errors');
+  handleCustomErrors,
+  handlePsqlErrors,
+  handleServerErrors,
+} = require("./errors");
 
 const {
   getAllTopics,
   getAllEndpoints,
 } = require("./controllers/topicsController");
-const { getArticleById, getAllArticles, getCommentsByArticleId,
-  postCommentByArticleId, patchArticleById } = require("./controllers/articlesController");
+
+const {
+  getArticleById,
+  getAllArticles,
+  getCommentsByArticleId,
+  postCommentByArticleId,
+  patchArticleById,
+} = require("./controllers/articlesController");
+
+const { getAllUsers } = require("./controllers/usersControllers");
 
 app.use(express.json());
 
@@ -29,6 +38,7 @@ app.post("/api/articles/:article_id/comments", postCommentByArticleId);
 
 app.patch("/api/articles/:article_id", patchArticleById);
 
+app.get("/api/users", getAllUsers);
 
 app.all("/*", (req, res, next) => {
   res.status(404).send({ msg: "URL not found" });
@@ -38,6 +48,5 @@ app.all("/*", (req, res, next) => {
 app.use(handleCustomErrors);
 app.use(handlePsqlErrors);
 app.use(handleServerErrors);
-
 
 module.exports = app;
