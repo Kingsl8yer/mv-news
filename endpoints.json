@@ -80,9 +80,8 @@
         "article_id": 1
       }
     }
-  }
-
   },
+
   "PATCH /api/articles/:article_id": {
     "description": "updates the votes of the given article_id",
     "queries": [],
@@ -97,6 +96,7 @@
         "comment_count": 6
     }
     }
+  }
 }
 
 
