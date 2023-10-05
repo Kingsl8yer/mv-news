@@ -151,6 +151,24 @@ describe("GET /api/articles", () => {
       });
   });
 
+  test("status 200: responds with an array of article objects sorted by any valid column", () => {
+    return request(app)
+      .get("/api/articles?sort_by=votes")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.articles).toBeSortedBy("votes", { descending: true });
+      });
+  });
+
+  test("status 200: responds with an array of article objects sorted by any valid column in any valid order", () => {
+    return request(app)
+      .get("/api/articles?sort_by=author&order=asc")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.articles).toBeSortedBy("author", { ascending: true });
+      });
+  });
+
   test("status 200: responds with a an empty array when given a topic with no articles", () => {
     return request(app)
       .get("/api/articles?topic=paper")
@@ -167,6 +185,23 @@ describe("GET /api/articles", () => {
       .expect(404)
       .then(({ body }) => {
         expect(body.msg).toBe("Topic not found");
+      });
+  });
+  test("status 400: responds with error message when given an invalid sort_by", () => {
+    return request(app)
+      .get("/api/articles?sort_by=invalid")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
+  });
+
+  test("status 400: responds with error message when given an invalid order", () => {
+    return request(app)
+      .get("/api/articles?order=invalid")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
       });
   });
 });

@@ -17,10 +17,21 @@ exports.selectArticleById = (article_id) => {
   });
 };
 
-exports.selectAllArticles = (topic) => {
+exports.selectAllArticles = (topic, sort_by, order) => {
   const topicsPromiseArray = selectAllTopics().then((topics) => {
     return topics.map((topic) => topic.slug);
   });
+
+  const orderAux = ["asc", "desc"];
+  const sort_byAux = [
+    "article_id",
+    "title",
+    "topic",
+    "author",
+    "created_at",
+    "votes",
+    "comment_count",
+  ];
 
   let sql = `SELECT articles.article_id, articles.title, articles.topic, 
         articles.author, articles.created_at, articles.votes, articles.article_img_url, 
@@ -34,8 +45,21 @@ exports.selectAllArticles = (topic) => {
       sql += ` WHERE articles.topic = '${topic}'`;
     }
 
-    sql += ` GROUP BY articles.article_id
-        ORDER BY articles.created_at DESC;`;
+    if (sort_by && !sort_byAux.includes(sort_by)) {
+      return Promise.reject({ status: 400, msg: "Bad request" });
+    } else if (sort_by && sort_byAux.includes(sort_by)) {
+      sql += ` GROUP BY articles.article_id ORDER BY ${sort_by}`;
+    } else {
+      sql += ` GROUP BY articles.article_id ORDER BY articles.created_at`;
+    }
+
+    if (order && !orderAux.includes(order)) {
+      return Promise.reject({ status: 400, msg: "Bad request" });
+    } else if (order && orderAux.includes(order)) {
+      sql += ` ${order.toUpperCase()}`;
+    } else {
+      sql += ` DESC;`;
+    }
 
     return db.query(sql).then(({ rows }) => {
       return rows;
