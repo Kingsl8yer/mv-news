@@ -187,6 +187,7 @@ describe("GET /api/articles", () => {
         expect(body.msg).toBe("Topic not found");
       });
   });
+
   test("status 400: responds with error message when given an invalid sort_by", () => {
     return request(app)
       .get("/api/articles?sort_by=invalid")
@@ -204,6 +205,7 @@ describe("GET /api/articles", () => {
         expect(body.msg).toBe("Bad request");
       });
   });
+  
 });
 
 describe("GET /api/articles/:article_id/comments", () => {

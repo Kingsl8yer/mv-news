@@ -38,5 +38,5 @@ https://mv-news.onrender.com
 ```
 
 ###6 The minimum versions of Node.js, and Postgres needed to run the project are:
--Node v20.5.1
--14.9 (Homebrew), server 16.0
+- Node v20.5.1
+- 14.9 (Homebrew), server 16.0
