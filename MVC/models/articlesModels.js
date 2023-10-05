@@ -1,5 +1,5 @@
 const db = require("../../db/connection");
-const {selectAllTopics} = require("./topicsModel");
+const { selectAllTopics } = require("./topicsModel");
 
 exports.selectArticleById = (article_id) => {
   const sql = "SELECT * FROM articles WHERE article_id = $1";
@@ -22,24 +22,20 @@ exports.selectAllArticles = (topic) => {
         COUNT(comments.comment_id) AS comment_count FROM articles
         LEFT JOIN comments ON articles.article_id = comments.article_id`;
 
-  return Promise.all([topicsPromiseArray])
-    .then(([topics]) => {
-      if (topic && !topics.includes(topic)) {
-        return Promise.reject({ status: 404, msg: "Topic not found" });
-      } else if (topic && topics.includes(topic)) {
-        sql += ` WHERE articles.topic = '${topic}'`;
-      }
+  return Promise.all([topicsPromiseArray]).then(([topics]) => {
+    if (topic && !topics.includes(topic)) {
+      return Promise.reject({ status: 404, msg: "Topic not found" });
+    } else if (topic && topics.includes(topic)) {
+      sql += ` WHERE articles.topic = '${topic}'`;
+    }
 
-      sql += ` GROUP BY articles.article_id
+    sql += ` GROUP BY articles.article_id
         ORDER BY articles.created_at DESC;`;
 
-      return db.query(sql).then(({ rows }) => {
-        return rows;
-      });
-    })
-    .catch((err) => {
-      return Promise.reject(err);
+    return db.query(sql).then(({ rows }) => {
+      return rows;
     });
+  });
 };
 
 exports.selectCommentsByArticleId = (article_id) => {
