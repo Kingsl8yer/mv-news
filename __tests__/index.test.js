@@ -133,12 +133,12 @@ describe("GET /api/articles", () => {
       });
   });
 
-  test("status 200: responds with a message 'No articles found' when given a topic with no articles", () => {
+  test("status 200: responds with a an empty array when given a topic with no articles", () => {
     return request(app)
       .get("/api/articles?topic=paper")
       .expect(200)
       .then(({ body }) => {
-        expect(body.msg).toBe("No articles found");
+        expect(body.articles.length).toBe(0);
       });
   });
 

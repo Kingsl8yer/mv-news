@@ -11,34 +11,41 @@ exports.selectArticleById = (article_id) => {
   });
 };
 
-exports.selectAllArticles = (topic) => {
-  const arrTopics = ["mitch", "cats", "paper"];
-
-  let sql = `SELECT articles.article_id, articles.title, articles.topic, 
-    articles.author, articles.created_at, articles.votes, articles.article_img_url, 
-    COUNT(comments.comment_id) AS comment_count FROM articles
-    LEFT JOIN comments ON articles.article_id = comments.article_id
-    GROUP BY articles.article_id
-    ORDER BY articles.created_at DESC;`;
-
-  if (topic && !arrTopics.includes(topic)) {
-    return Promise.reject({ status: 404, msg: "Topic not found" });
-  } else if (topic && arrTopics.includes(topic)) {
-    sql = `SELECT articles.article_id, articles.title, articles.topic, 
-            articles.author, articles.created_at, articles.votes, articles.article_img_url, 
-            COUNT(comments.comment_id) AS comment_count FROM articles
-            LEFT JOIN comments ON articles.article_id = comments.article_id
-            WHERE articles.topic = '${topic}'
-            GROUP BY articles.article_id
-            ORDER BY articles.created_at DESC ;`;
-  }
-
+const selectAlltopics = () => {
+  const sql = `SELECT * FROM topics;`;
   return db.query(sql).then(({ rows }) => {
-    if (rows.length === 0 && topic) {
-      return Promise.reject({ status: 200, msg: "No articles found" });
-    }
     return rows;
   });
+};
+
+exports.selectAllArticles = (topic) => {
+  const topicsPromiseArray = selectAlltopics().then((topics) => {
+    return topics.map((topic) => topic.slug);
+  });
+
+  let sql = `SELECT articles.article_id, articles.title, articles.topic, 
+        articles.author, articles.created_at, articles.votes, articles.article_img_url, 
+        COUNT(comments.comment_id) AS comment_count FROM articles
+        LEFT JOIN comments ON articles.article_id = comments.article_id`;
+
+  return Promise.all([topicsPromiseArray])
+    .then(([topics]) => {
+      if (topic && !topics.includes(topic)) {
+        return Promise.reject({ status: 404, msg: "Topic not found" });
+      } else if (topic && topics.includes(topic)) {
+        sql += ` WHERE articles.topic = '${topic}'`;
+      }
+
+      sql += ` GROUP BY articles.article_id
+        ORDER BY articles.created_at DESC;`;
+
+      return db.query(sql).then(({ rows }) => {
+        return rows;
+      });
+    })
+    .catch((err) => {
+      return Promise.reject(err);
+    });
 };
 
 exports.selectCommentsByArticleId = (article_id) => {
