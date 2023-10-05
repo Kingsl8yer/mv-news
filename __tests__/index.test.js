@@ -444,3 +444,26 @@ describe("GET /api/users", () => {
       });
   });
 });
+
+describe("GET /api/users/:username", () => {
+  test("status 200: responds with a user object", () => {
+      return request(app)
+          .get("/api/users/butter_bridge")
+          .expect(200)
+          .then(({body}) => {
+              expect(body.user.username).toBe("butter_bridge");
+              expect(typeof body.user.name).toBe("string");
+              expect(typeof body.user.avatar_url).toBe("string");
+          });
+  });
+
+  //Error handling
+  test("status 404: responds with error message when the given username does not exist", () => {
+      return request(app)
+          .get("/api/users/invalid")
+          .expect(404)
+          .then(({body}) => {
+              expect(body.msg).toBe("User Not Found");
+          });
+  });
+})

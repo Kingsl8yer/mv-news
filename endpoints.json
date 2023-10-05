@@ -96,7 +96,6 @@
     }
     }
   }, 
-
   "DELETE /api/comments/:comment_id": {
     "description": "deletes the comment with the given comment_id",
     "queries": [],
@@ -133,7 +132,18 @@
         }
       ]
     }
-  }
+  },
+  "GET /api/users/:username": {
+    "description": "serves a user object for the given username",
+      "queries": [],
+      "exampleResponse": {
+        "user": {
+          "username": "butter_bridge",
+          "name": "jonny",
+          "avatar_url": "https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg"
+        }
+      }
+}
 }
 
 
