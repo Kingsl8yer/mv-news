@@ -1,4 +1,5 @@
 const db = require("../../db/connection");
+const {selectAllTopics} = require("./topicsModel");
 
 exports.selectArticleById = (article_id) => {
   const sql = "SELECT * FROM articles WHERE article_id = $1";
@@ -11,15 +12,8 @@ exports.selectArticleById = (article_id) => {
   });
 };
 
-const selectAlltopics = () => {
-  const sql = `SELECT * FROM topics;`;
-  return db.query(sql).then(({ rows }) => {
-    return rows;
-  });
-};
-
 exports.selectAllArticles = (topic) => {
-  const topicsPromiseArray = selectAlltopics().then((topics) => {
+  const topicsPromiseArray = selectAllTopics().then((topics) => {
     return topics.map((topic) => topic.slug);
   });
 
