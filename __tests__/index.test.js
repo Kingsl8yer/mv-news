@@ -207,6 +207,16 @@ describe("GET /api/articles", () => {
       });
   });
 
+  test("status 200: responds with a amount of articles equal to the limit if the limit is less than the total count", () => {
+    return request(app)
+      .get("/api/articles?limit=5")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.articles.length).toBe(5);
+        expect(body.total_count).toBe(13);
+      });
+  });
+
   //Error handling
   test("status 404: responds with error message when given an invalid topic", () => {
     return request(app)
@@ -229,6 +239,24 @@ describe("GET /api/articles", () => {
   test("status 400: responds with error message when given an invalid order", () => {
     return request(app)
       .get("/api/articles?order=invalid")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
+  });
+
+  test("status 400: responds with error message when given an invalid limit", () => {
+    return request(app)
+      .get("/api/articles?limit=invalid")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
+  });
+
+  test("status 400: responds with error message when given an invalid page number", () => {
+    return request(app)
+      .get("/api/articles?p=invalid")
       .expect(400)
       .then(({ body }) => {
         expect(body.msg).toBe("Bad request");
