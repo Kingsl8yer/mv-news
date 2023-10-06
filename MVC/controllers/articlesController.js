@@ -17,10 +17,12 @@ exports.getArticleById = (req, res, next) => {
 };
 
 exports.getAllArticles = (req, res, next) => {
-  const { topic, sort_by, order } = req.query;
-  selectAllArticles(topic, sort_by, order)
-    .then((articles) => {
-      res.status(200).send({ articles });
+  const { topic, sort_by, order, limit = 10, p = 1 } = req.query;
+  const promise1 = selectAllArticles(topic, sort_by, order, limit, p);
+  const promise2 = selectAllArticles(topic, sort_by, order);
+  Promise.all([promise1, promise2])
+    .then(([articles, articles2]) => {
+      res.status(200).send({ articles, total_count: articles2.length });
     })
     .catch(next);
 };

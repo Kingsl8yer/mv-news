@@ -17,7 +17,7 @@ exports.selectArticleById = (article_id) => {
   });
 };
 
-exports.selectAllArticles = (topic, sort_by, order) => {
+exports.selectAllArticles = (topic, sort_by, order, limit, p) => {
   const topicsPromiseArray = selectAllTopics().then((topics) => {
     return topics.map((topic) => topic.slug);
   });
@@ -33,7 +33,8 @@ exports.selectAllArticles = (topic, sort_by, order) => {
     "comment_count",
   ];
 
-  let sql = `SELECT articles.article_id, articles.title, articles.topic, 
+  let sql = `
+        SELECT articles.article_id, articles.title, articles.topic, 
         articles.author, articles.created_at, articles.votes, articles.article_img_url, 
         COUNT(comments.comment_id) AS comment_count FROM articles
         LEFT JOIN comments ON articles.article_id = comments.article_id`;
@@ -58,8 +59,14 @@ exports.selectAllArticles = (topic, sort_by, order) => {
     } else if (order && orderAux.includes(order)) {
       sql += ` ${order.toUpperCase()}`;
     } else {
-      sql += ` DESC;`;
+      sql += ` DESC`;
     }
+
+    if (limit && p) {
+      sql += ` LIMIT ${limit} OFFSET ${(p - 1) * limit}`;
+    }
+
+    sql += `;`;
 
     return db.query(sql).then(({ rows }) => {
       return rows;
@@ -106,16 +113,15 @@ exports.updateArticleById = (article_id, inc_votes) => {
 };
 
 exports.insertArticle = (title, body, topic, author, article_img_url) => {
-    if (!title || !body || !topic || !author) {
-        return Promise.reject({ status: 400, msg: "Bad request" });
-    }
-    const sql = `INSERT INTO articles (title, body, topic, author, article_img_url)
+  if (!title || !body || !topic || !author) {
+    return Promise.reject({ status: 400, msg: "Bad request" });
+  }
+  const sql = `INSERT INTO articles (title, body, topic, author, article_img_url)
             VALUES ($1, $2, $3, $4, $5)
             RETURNING *;`;
-    return db
-        .query(sql, [title, body, topic, author, article_img_url])
-        .then(({ rows }) => {
-        return rows[0];
-        });
-}
-
+  return db
+    .query(sql, [title, body, topic, author, article_img_url])
+    .then(({ rows }) => {
+      return rows[0];
+    });
+};

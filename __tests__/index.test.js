@@ -116,7 +116,7 @@ describe("GET /api/articles", () => {
       .get("/api/articles")
       .expect(200)
       .then(({ body }) => {
-        expect(body.articles.length).toBe(13);
+        expect(body.articles.length).toBe(10);
         body.articles.forEach((article) => {
           expect(typeof article.author).toBe("string");
           expect(typeof article.title).toBe("string");
@@ -144,7 +144,7 @@ describe("GET /api/articles", () => {
       .get("/api/articles?topic=mitch")
       .expect(200)
       .then(({ body }) => {
-        expect(body.articles.length).toBe(12);
+        expect(body.articles.length).toBe(10);
         body.articles.forEach((article) => {
           expect(article.topic).toBe("mitch");
         });
@@ -175,6 +175,35 @@ describe("GET /api/articles", () => {
       .expect(200)
       .then(({ body }) => {
         expect(body.articles.length).toBe(0);
+      });
+  });
+
+  test("status 200: responds with different articles when given a page number", () => {
+    return request(app)
+      .get("/api/articles?p=2")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.articles.length).toBe(3);
+        expect(body.articles[0].article_id).toBe(8);
+      });
+  });
+
+  test("status 200: responds with an empty array when given a page number that is too high", () => {
+    return request(app)
+      .get("/api/articles?p=100")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.articles.length).toBe(0);
+      });
+  });
+
+  test("status 200: responds with a total_count property displaying the total  articles discounting the limit", () => {
+    return request(app)
+      .get("/api/articles")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.total_count).toBe(13);
+        expect(body.articles.length).toBe(10);
       });
   });
 
@@ -209,103 +238,104 @@ describe("GET /api/articles", () => {
 
 describe("POST /api/articles", () => {
   test("status 201: responds with the posted article object", () => {
-      return request(app)
-          .post("/api/articles")
-          .send({
-              title: "This is a test title",
-              body: "This is a test body",
-              topic: "mitch",
-              author: "butter_bridge",
-              article_img_url: "https://www.test.com/test.jpg",
-          })
-          .expect(201)
-          .then(({body}) => {
-              expect(body.article_id).toBe(14);
-              expect(body.author).toBe("butter_bridge");
-              expect(body.title).toBe("This is a test title");
-              expect(body.body).toBe("This is a test body");
-              expect(body.topic).toBe("mitch");
-              expect(body.article_img_url).toBe("https://www.test.com/test.jpg");
-              expect(body.votes).toBe(0);
-              expect(body.created_at).not.toBe(undefined);
-              expect(body.comment_count).toBe("0");
-          });
+    return request(app)
+      .post("/api/articles")
+      .send({
+        title: "This is a test title",
+        body: "This is a test body",
+        topic: "mitch",
+        author: "butter_bridge",
+        article_img_url: "https://www.test.com/test.jpg",
+      })
+      .expect(201)
+      .then(({ body }) => {
+        expect(body.article_id).toBe(14);
+        expect(body.author).toBe("butter_bridge");
+        expect(body.title).toBe("This is a test title");
+        expect(body.body).toBe("This is a test body");
+        expect(body.topic).toBe("mitch");
+        expect(body.article_img_url).toBe("https://www.test.com/test.jpg");
+        expect(body.votes).toBe(0);
+        expect(body.created_at).not.toBe(undefined);
+        expect(body.comment_count).toBe("0");
+      });
   });
 
   test("status 201: responds with the posted article object ignoring any extra properties", () => {
-      return request(app)
-          .post("/api/articles")
-          .send({
-              title: "This is a test title",
-              body: "This is a test body",
-              topic: "mitch",
-              author: "butter_bridge",
-              article_img_url: "https://www.test.com/test.jpg",
-              extra: "extra",
-          })
-          .expect(201)
-          .then(({body}) => {
-              expect(body.article_id).toBe(14);
-              expect(body.author).toBe("butter_bridge");
-              expect(body.title).toBe("This is a test title");
-              expect(body.body).toBe("This is a test body");
-              expect(body.topic).toBe("mitch");
-              expect(body.article_img_url).toBe("https://www.test.com/test.jpg");
-              expect(body.votes).toBe(0);
-              expect(body.created_at).not.toBe(undefined);
-              expect(body.comment_count).toBe("0");
-              expect(body.extra).toBe(undefined);
-          });
+    return request(app)
+      .post("/api/articles")
+      .send({
+        title: "This is a test title",
+        body: "This is a test body",
+        topic: "mitch",
+        author: "butter_bridge",
+        article_img_url: "https://www.test.com/test.jpg",
+        extra: "extra",
+      })
+      .expect(201)
+      .then(({ body }) => {
+        expect(body.article_id).toBe(14);
+        expect(body.author).toBe("butter_bridge");
+        expect(body.title).toBe("This is a test title");
+        expect(body.body).toBe("This is a test body");
+        expect(body.topic).toBe("mitch");
+        expect(body.article_img_url).toBe("https://www.test.com/test.jpg");
+        expect(body.votes).toBe(0);
+        expect(body.created_at).not.toBe(undefined);
+        expect(body.comment_count).toBe("0");
+        expect(body.extra).toBe(undefined);
+      });
   });
 
   test("status 201: responds with the posted article object with a default image when no image is given", () => {
-      return request(app)
-          .post("/api/articles")
-          .send({
-              title: "This is a test title",
-              body: "This is a test body",
-              topic: "mitch",
-              author: "butter_bridge",
-          })
-          .expect(201)
-          .then(({body}) => {
-              expect(body.article_id).toBe(14);
-              expect(body.author).toBe("butter_bridge");
-              expect(body.title).toBe("This is a test title");
-              expect(body.body).toBe("This is a test body");
-              expect(body.topic).toBe("mitch");
-              expect(body.article_img_url).toBe("https://images.pexels.com/photos/97050/pexels-photo-97050.jpeg?w=700&h=700");
-              expect(body.votes).toBe(0);
-              expect(body.created_at).not.toBe(undefined);
-              expect(body.comment_count).toBe("0");
-          });
+    return request(app)
+      .post("/api/articles")
+      .send({
+        title: "This is a test title",
+        body: "This is a test body",
+        topic: "mitch",
+        author: "butter_bridge",
+      })
+      .expect(201)
+      .then(({ body }) => {
+        expect(body.article_id).toBe(14);
+        expect(body.author).toBe("butter_bridge");
+        expect(body.title).toBe("This is a test title");
+        expect(body.body).toBe("This is a test body");
+        expect(body.topic).toBe("mitch");
+        expect(body.article_img_url).toBe(
+          "https://images.pexels.com/photos/97050/pexels-photo-97050.jpeg?w=700&h=700"
+        );
+        expect(body.votes).toBe(0);
+        expect(body.created_at).not.toBe(undefined);
+        expect(body.comment_count).toBe("0");
+      });
   });
 
   //Error handling
   test("status 400: responds with error message when no body is given", () => {
-      return request(app)
-          .post("/api/articles")
-          .send({})
-          .expect(400)
-          .then(({body}) => {
-              expect(body.msg).toBe("Bad request");
-          });
+    return request(app)
+      .post("/api/articles")
+      .send({})
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
   });
 
   test("status 400: responds with error message when missing a required property(author)", () => {
-      return request(app)
-          .post("/api/articles")
-          .send({
-              title: "This is a test title",
-              body: "This is a test body",
-              topic: "mitch",
-          })
-          .expect(400)
-          .then(({body}) => {
-              expect(body.msg).toBe("Bad request");
-          });
+    return request(app)
+      .post("/api/articles")
+      .send({
+        title: "This is a test title",
+        body: "This is a test body",
+        topic: "mitch",
+      })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
   });
-
 });
 
 describe("GET /api/articles/:article_id/comments", () => {
