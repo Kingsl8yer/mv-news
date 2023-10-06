@@ -372,9 +372,9 @@ describe("GET /api/articles/:article_id/comments", () => {
       .get("/api/articles/1/comments")
       .expect(200)
       .then(({ body }) => {
-        expect(body.length).toBe(11);
-        expect(body[0].article_id).toBe(1);
-        body.forEach((comment) => {
+        expect(body.comments.length).toBe(10);
+        expect(body.comments[0].article_id).toBe(1);
+        body.comments.forEach((comment) => {
           expect(typeof comment.comment_id).toBe("number");
           expect(typeof comment.votes).toBe("number");
           expect(typeof comment.created_at).toBe("string");
@@ -389,16 +389,48 @@ describe("GET /api/articles/:article_id/comments", () => {
       .get("/api/articles/1/comments")
       .expect(200)
       .then(({ body }) => {
-        expect(body).toBeSortedBy("created_at", { descending: true });
+        expect(body.comments).toBeSortedBy("created_at", { descending: true });
       });
   });
 
-  test("status 200: responds with a message 'Comments not found' when given an article_id with no comments", () => {
+  test("status 200: responds with a empty array when given an article with no comments", () => {
     return request(app)
       .get("/api/articles/2/comments")
       .expect(200)
       .then(({ body }) => {
-        expect(body.msg).toBe("Comments not found");
+        expect(body.comments.length).toBe(0);
+      });
+  });
+
+  test("status 200: responds with a total_count property displaying the total  comments discounting the limit", () => {
+    return request(app)
+      .get("/api/articles/1/comments")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.total_count).toBe(11);
+        expect(body.comments.length).toBe(10);
+      });
+  });
+
+  test("status 200: responds with a amount of comments equal to the limit if the limit is less than the total count", () => {
+    return request(app)
+      .get("/api/articles/1/comments?limit=5")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.comments.length).toBe(5);
+        expect(body.total_count).toBe(11);
+      });
+  });
+
+  test("status 200: responds with different comments when given a page number", () => {
+    return request(app)
+      .get("/api/articles/1/comments?p=2")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.comments.length).toBe(1);
+        expect(body.comments[0].comment_id).toBe(9);
+        expect(body.comments[0].article_id).toBe(1);
+        expect(body.total_count).toBe(11);
       });
   });
 
@@ -415,6 +447,24 @@ describe("GET /api/articles/:article_id/comments", () => {
   test("status 400: responds with error message when given an invalid article_id", () => {
     return request(app)
       .get("/api/articles/invalid/comments")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
+  });
+
+  test("status 400: responds with error message when given an invalid limit", () => {
+    return request(app)
+      .get("/api/articles/1/comments?limit=invalid")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
+  });
+
+  test("status 400: responds with error message when given an invalid page number", () => {
+    return request(app)
+      .get("/api/articles/1/comments?p=invalid")
       .expect(400)
       .then(({ body }) => {
         expect(body.msg).toBe("Bad request");

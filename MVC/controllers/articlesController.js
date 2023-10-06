@@ -28,13 +28,17 @@ exports.getAllArticles = (req, res, next) => {
 };
 
 exports.getCommentsByArticleId = (req, res, next) => {
-  const { article_id } = req.params;
+  const { article_id} = req.params;
+  const {limit = 10, p = 1} = req.query;
 
-  const promises = [selectArticleById(article_id)];
-  if (article_id) promises.push(selectCommentsByArticleId(article_id));
-  Promise.all(promises)
-    .then(([article, comments]) => {
-      res.status(200).send(comments);
+  const promise = [selectArticleById(article_id)];
+  if (article_id) {
+    promise.push(selectCommentsByArticleId(article_id, limit, p));
+    promise.push(selectCommentsByArticleId(article_id));
+  }
+  Promise.all(promise)
+    .then(([article, comments, comments2]) => {
+      res.status(200).send({ comments, total_count: comments2.length });
     })
     .catch((err) => {
       next(err);
