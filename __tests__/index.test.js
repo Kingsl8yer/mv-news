@@ -205,7 +205,6 @@ describe("GET /api/articles", () => {
         expect(body.msg).toBe("Bad request");
       });
   });
-  
 });
 
 describe("GET /api/articles/:article_id/comments", () => {
@@ -429,6 +428,50 @@ describe("DELETE /api/comments/:comment_id", () => {
   });
 });
 
+describe("PATCH /api/comments/:comment_id", () => {
+  test("status 200: responds with the updated comment object", () => {
+    return request(app)
+      .patch("/api/comments/4")
+      .send({ inc_votes: 1 })
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.comment.votes).toBe(-99);
+        expect(body.comment.comment_id).toBe(4);
+      });
+  });
+
+  //Error handling
+  test("status 404: responds with error message when the given comment_id does not exist", () => {
+    return request(app)
+      .patch("/api/comments/1000")
+      .send({ inc_votes: 1 })
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Comment not found");
+      });
+  });
+
+  test("status 400: responds with error message when given an invalid comment_id", () => {
+    return request(app)
+      .patch("/api/comments/invalid")
+      .send({ inc_votes: 1 })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
+  });
+
+  test("status 400: responds with error message when given an invalid inc_votes", () => {
+    return request(app)
+      .patch("/api/comments/1")
+      .send({ inc_votes: "invalid" })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
+  });
+});
+
 describe("GET /api/users", () => {
   test("status 200: responds with an array of user objects", () => {
     return request(app)
@@ -447,23 +490,23 @@ describe("GET /api/users", () => {
 
 describe("GET /api/users/:username", () => {
   test("status 200: responds with a user object", () => {
-      return request(app)
-          .get("/api/users/butter_bridge")
-          .expect(200)
-          .then(({body}) => {
-              expect(body.user.username).toBe("butter_bridge");
-              expect(typeof body.user.name).toBe("string");
-              expect(typeof body.user.avatar_url).toBe("string");
-          });
+    return request(app)
+      .get("/api/users/butter_bridge")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.user.username).toBe("butter_bridge");
+        expect(typeof body.user.name).toBe("string");
+        expect(typeof body.user.avatar_url).toBe("string");
+      });
   });
 
   //Error handling
   test("status 404: responds with error message when the given username does not exist", () => {
-      return request(app)
-          .get("/api/users/invalid")
-          .expect(404)
-          .then(({body}) => {
-              expect(body.msg).toBe("User Not Found");
-          });
+    return request(app)
+      .get("/api/users/invalid")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("User Not Found");
+      });
   });
-})
+});
