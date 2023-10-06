@@ -157,6 +157,21 @@
       "article_id": 1
     }
   }
+},
+"POST /api/articles": {
+  "description": "adds a new article",
+  "queries": [],
+  "exampleResponse": {
+    "article": {
+      "title": "Winter is Coming",
+      "topic": "weather",
+      "author": "Ned Stark",
+      "body": "Game of Thrones..",
+      "created_at": "2009-05-30T15:59:13.341Z",
+      "votes": 0,
+      "comment_count": 0
+    }
+  }
 }
 
 }

@@ -104,3 +104,18 @@ exports.updateArticleById = (article_id, inc_votes) => {
     return rows[0];
   });
 };
+
+exports.insertArticle = (title, body, topic, author, article_img_url) => {
+    if (!title || !body || !topic || !author) {
+        return Promise.reject({ status: 400, msg: "Bad request" });
+    }
+    const sql = `INSERT INTO articles (title, body, topic, author, article_img_url)
+            VALUES ($1, $2, $3, $4, $5)
+            RETURNING *;`;
+    return db
+        .query(sql, [title, body, topic, author, article_img_url])
+        .then(({ rows }) => {
+        return rows[0];
+        });
+}
+
